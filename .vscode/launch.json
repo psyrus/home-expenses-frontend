@@ -16,6 +16,23 @@
             "name": "Run npm start",
             "request": "launch",
             "type": "node-terminal"
+        },
+        {
+            "name": "Launch Firefox",
+            "request": "launch",
+            "type": "firefox",
+            "webRoot": "${workspaceFolder}",
+            "url": "http://localhost:3000",
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Webserver+Browser",
+            "configurations": [
+                "Run npm start",
+                "Launch Firefox"
+            ],
+            "stopAll": true
         }
     ]
 }
