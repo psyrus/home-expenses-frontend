@@ -23,14 +23,22 @@
             "type": "firefox",
             "webRoot": "${workspaceFolder}",
             "url": "http://localhost:3000",
-        }
+        },
     ],
     "compounds": [
         {
-            "name": "Webserver+Browser",
+            "name": "Webserver+Browser (unix)",
             "configurations": [
                 "Run npm start",
                 "Launch Firefox"
+            ],
+            "stopAll": true
+        },
+        {
+            "name": "Webserver+Browser (windows)",
+            "configurations": [
+                "Run npm start",
+                "Launch Edge"
             ],
             "stopAll": true
         }
