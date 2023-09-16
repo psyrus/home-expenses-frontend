@@ -1,9 +1,13 @@
+import { Fragment } from 'react';
 import ExpenseForm from '../../components/expense/expense-form.component';
 import logo from '../../logo.svg';
+import LoginComponent from '../../components/login/login.component';
 
 const Home = () => {
+
   return (
     <div className="App">
+      <LoginComponent />
       <ExpenseForm></ExpenseForm>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
