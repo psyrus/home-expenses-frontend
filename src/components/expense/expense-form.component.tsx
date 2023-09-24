@@ -1,22 +1,29 @@
-import { useState } from "react";
+import { request } from "http";
+import { useEffect, useState } from "react";
 
-const defaultOptions = [
-  { value: '', text: '--Choose an option--' },
-  { value: 'kid', text: 'Kid' },
-  { value: 'health', text: 'Health' },
-  { value: 'home', text: 'Home' },
-  { value: 'other', text: 'Other' },
-];
+// const defaultOptions = [
+//   { value: '', text: '--Choose an option--' },
+//   { value: 'kid', text: 'Kid' },
+//   { value: 'health', text: 'Health' },
+//   { value: 'home', text: 'Home' },
+//   { value: 'other', text: 'Other' },
+// ];
 
 const defaultFormFields = {
   category: '',
   description: '',
-  purchaseDate: '',
+  expense_date: '',
   cost: 0,
+}
+
+export type Category = {
+  id: number;
+  name: string;
 }
 
 const ExpenseForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -34,11 +41,37 @@ const ExpenseForm = () => {
     });
   };
 
+
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const endpoint: string = "http://localhost:5000/categories"
+      const requestOptions = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'mode': 'no-cors'
+        }
+      };
+      const response = await fetch(endpoint, requestOptions);
+      const content = await response.json();
+      setCategories(content);
+    }
+
+    getCategories();
+    console.log('fetch effect is firing');
+  }, [])
+
   const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     console.log("hey!")
     e.preventDefault();
 
     console.log(formFields);
+
+    const myBody = {
+      ...formFields,
+      "registered_by_user": 1,
+    }
 
     const requestOptions = {
       method: 'POST',
@@ -46,10 +79,10 @@ const ExpenseForm = () => {
         'Content-Type': 'application/json',
         'mode': 'no-cors'
       },
-      body: JSON.stringify(formFields)
+      body: JSON.stringify(myBody)
     };
 
-    fetch('http://localhost:5000/expenses/add', requestOptions)
+    fetch('http://localhost:5000/expense', requestOptions)
       .then((response) => {
         return response.json();
       })
@@ -63,8 +96,8 @@ const ExpenseForm = () => {
       <form onSubmit={handleSubmit}>
         <label>Category</label>
         <select value={formFields.category} name="category" onChange={handleSelectChange}>
-          {defaultOptions.map(option => (
-            <option key={option.value} value={option.value}>{option.text}</option>
+          {categories.map(option => (
+            <option key={option.id} value={option.id}>{option.name}</option>
           ))}
         </select>
         {
@@ -73,7 +106,7 @@ const ExpenseForm = () => {
         <label>Description</label>
         <input type="text" name="description" minLength={2} required onChange={handleChange}></input>
         <label>Date of Purchase</label>
-        <input type="date" name="purchaseDate" onChange={handleChange}></input>
+        <input type="date" name="expense_date" onChange={handleChange}></input>
 
         <label>Cost</label>
         <input type="number" name="cost" placeholder="Value in ¥" min="100" onChange={handleChange} />
