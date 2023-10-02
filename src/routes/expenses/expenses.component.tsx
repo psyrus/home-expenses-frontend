@@ -1,11 +1,9 @@
-import Moak from '../../components/expense/expenses';
+import ExpensesList from '../../components/expense/expenses-list.component';
 
 const Expenses = () => {
     return (
         <div className="Expenses">
-            {/* <ExpenseForm></ExpenseForm> */}
-            {/* <TopMoak></TopMoak> */}
-            <Moak></Moak>
+            <ExpensesList />
         </div>
     );
 };
