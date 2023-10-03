@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ExpenseItem from "./expense-item.component";
+import { Container } from "react-bootstrap";
 
 export type ExpenseApiResponse = {
     "category": number,
@@ -64,7 +65,7 @@ const ExpensesList = () => {
     }, [])
 
     return (
-        <div>
+        <Container>
             <h1>Expenses</h1>
 
             {expensesData ? (
@@ -90,7 +91,7 @@ const ExpensesList = () => {
             ) : (
                 <p>Loading...</p>
             )}
-        </div>
+        </Container>
     );
 }
 
