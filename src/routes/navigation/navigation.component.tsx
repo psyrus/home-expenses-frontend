@@ -1,8 +1,29 @@
 import { Fragment } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
+type NavigationItem = {
+  route: string,
+  description: string
+}
 
 const Navigation = () => {
+  const currentPath: string = window.location.pathname
+
+  const navigationItems: NavigationItem[] = [
+    {
+      route: "/",
+      description: "Create Expense"
+    },
+    {
+      route: "/expenses",
+      description: "View Expenses"
+    },
+    {
+      route: "/login",
+      description: "Login"
+    }
+  ]
+
   return (
     <Fragment>
       <div className="container">
@@ -12,9 +33,9 @@ const Navigation = () => {
           </a>
 
           <ul className="nav nav-pills">
-            <li className="nav-item"><a href="#" className="nav-link active" aria-current="page">Create Expense</a></li>
-            <li className="nav-item"><a href="#" className="nav-link">View Expenses</a></li>
-            <li className="nav-item"><a href="#" className="nav-link">Login</a></li>
+            {navigationItems.map((navItem: NavigationItem, index: number) => {
+              return <li key={index} className="nav-item"><a href={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</a></li>
+            })}
           </ul>
         </header>
       </div>
