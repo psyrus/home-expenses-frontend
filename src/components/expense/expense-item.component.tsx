@@ -1,4 +1,4 @@
-import { ExpenseApiResponse, UserApiResponse, CategoryApiResponse } from "./expenses-list.component";
+import { ExpenseApiResponse } from "./expenses-list.component";
 
 type ExpenseItemProps = {
   item: ExpenseApiResponse
