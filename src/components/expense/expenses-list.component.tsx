@@ -14,10 +14,23 @@ export type ExpenseApiResponse = {
     "updated_at": string
 }
 
+export type CategoryApiResponse = {
+    "id": number,
+    "name": string
+}
+
+export type UserApiResponse = {
+    id: number,
+    auth_provider_id: string,
+    created_at: string,
+    email: string,
+    username: string
+}
+
 const ExpensesList = () => {
     const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
-    const [categoriesData, setCategoriesData] = useState(null);
-    const [usersData, setUsersData] = useState(null);
+    const [categoriesData, setCategoriesData] = useState<Map<number, CategoryApiResponse>>(new Map<number, CategoryApiResponse>());
+    const [usersData, setUsersData] = useState<Map<number, UserApiResponse>>(new Map<number, UserApiResponse>());
 
     useEffect(() => {
         const getExpenses = async () => {
@@ -44,7 +57,11 @@ const ExpensesList = () => {
             };
             const r = await fetch(endpoint, requestOptions);
             const content = await r.json();
-            setCategoriesData(content);
+            let categoriesMap = new Map<number, any>();
+            content.map((category: any) => {
+                categoriesMap.set(category.id, category);
+            })
+            setCategoriesData(categoriesMap);
         }
         const getUsers = async () => {
             const endpoint: string = "http://localhost:5000/users"
@@ -57,7 +74,11 @@ const ExpensesList = () => {
             };
             const r = await fetch(endpoint, requestOptions);
             const content = await r.json();
-            setUsersData(content);
+            let usersMap = new Map<number, any>();
+            content.map((user: any) => {
+                usersMap.set(user.id, user);
+            })
+            setUsersData(usersMap);
         }
         getUsers();
         getExpenses();
@@ -68,7 +89,7 @@ const ExpensesList = () => {
         <Container>
             <h1>Expenses</h1>
 
-            {expensesData ? (
+            {expensesData && usersData && categoriesData ? (
                 <table className="table table-sm table-hover">
                     <thead>
                         <tr>
@@ -84,7 +105,7 @@ const ExpensesList = () => {
                     <tbody className="table-group-divider">
                         {
                             expensesData.map((apiItem) => {
-                                return <ExpenseItem item={apiItem} key={apiItem.id} />
+                                return <ExpenseItem item={apiItem} user={usersData.get(apiItem.registered_by_user)} category={categoriesData.get(apiItem.category)} key={apiItem.id} />
                             })}
                     </tbody>
                 </table>
