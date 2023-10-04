@@ -4,6 +4,7 @@ import { Container } from "react-bootstrap";
 
 export type ExpenseApiResponse = {
     "category": number,
+    "category_obj": CategoryApiResponse,
     "cost": number,
     "created_at": string,
     "description": string,
@@ -11,17 +12,31 @@ export type ExpenseApiResponse = {
     "id": number,
     "paid_back": boolean,
     "registered_by_user": number,
+    "user_obj": UserApiResponse,
     "updated_at": string
+}
+
+export type CategoryApiResponse = {
+    "id": number,
+    "name": string
+}
+
+export type UserApiResponse = {
+    id: number,
+    auth_provider_id: string,
+    created_at: string,
+    email: string,
+    username: string
 }
 
 const ExpensesList = () => {
     const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
-    const [categoriesData, setCategoriesData] = useState(null);
-    const [usersData, setUsersData] = useState(null);
 
     useEffect(() => {
+        /**
+         * This function doesn't have to be as complicated if the object could simply be built on the backend side.
+         */
         const getExpenses = async () => {
-            const endpoint: string = "http://localhost:5000/expenses"
             const requestOptions = {
                 method: 'GET',
                 headers: {
@@ -29,39 +44,42 @@ const ExpensesList = () => {
                     'mode': 'no-cors'
                 }
             };
-            const r = await fetch(endpoint, requestOptions);
-            const content = await r.json();
-            setExpensesData(content);
-        }
-        const getCategories = async () => {
-            const endpoint: string = "http://localhost:5000/categories"
-            const requestOptions = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'mode': 'no-cors'
+
+            const expensesEndpoint: string = "http://localhost:5000/expenses"
+            const categoriesEndpoint: string = "http://localhost:5000/categories"
+            const usersEndpoint: string = "http://localhost:5000/users"
+
+            const usersResponse = await fetch(usersEndpoint, requestOptions);
+            const categoriesResponse = await fetch(categoriesEndpoint, requestOptions);
+            const expensesResponse = await fetch(expensesEndpoint, requestOptions);
+
+            const usersContent = await usersResponse.json();
+            const categoriesContent = await categoriesResponse.json();
+            const expensesContent = await expensesResponse.json();
+
+            let categoriesMap = new Map<number, CategoryApiResponse>();
+            categoriesContent.map((category: CategoryApiResponse) => {
+                categoriesMap.set(category.id, category);
+            })
+
+            let usersMap: Map<number, UserApiResponse> = new Map<number, UserApiResponse>();
+            usersContent.map((user: UserApiResponse) => {
+                usersMap.set(user.id, user);
+            })
+
+            console.log(categoriesMap);
+            console.log(usersMap);
+
+            const expenses: ExpenseApiResponse[] = expensesContent.map((item: any) => {
+                return {
+                    ...item, 'user_obj': usersMap.get(item.registered_by_user), 'category_obj': categoriesMap.get(item.category)
                 }
-            };
-            const r = await fetch(endpoint, requestOptions);
-            const content = await r.json();
-            setCategoriesData(content);
+            });
+
+            setExpensesData(expenses);
         }
-        const getUsers = async () => {
-            const endpoint: string = "http://localhost:5000/users"
-            const requestOptions = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'mode': 'no-cors'
-                }
-            };
-            const r = await fetch(endpoint, requestOptions);
-            const content = await r.json();
-            setUsersData(content);
-        }
-        getUsers();
+
         getExpenses();
-        getCategories();
     }, [])
 
     return (
