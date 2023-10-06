@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import ExpenseItem from "./expense-item.component";
 import { Container } from "react-bootstrap";
+import ApiClient from "../../utils/backend-api";
+
+const client = new ApiClient()
 
 export type ExpenseApiResponse = {
     "category": number,
@@ -37,25 +40,9 @@ const ExpensesList = () => {
          * This function doesn't have to be as complicated if the object could simply be built on the backend side.
          */
         const getExpenses = async () => {
-            const requestOptions = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'mode': 'no-cors'
-                }
-            };
-
-            const expensesEndpoint: string = "http://localhost:5000/expenses"
-            const categoriesEndpoint: string = "http://localhost:5000/categories"
-            const usersEndpoint: string = "http://localhost:5000/users"
-
-            const usersResponse = await fetch(usersEndpoint, requestOptions);
-            const categoriesResponse = await fetch(categoriesEndpoint, requestOptions);
-            const expensesResponse = await fetch(expensesEndpoint, requestOptions);
-
-            const usersContent = await usersResponse.json();
-            const categoriesContent = await categoriesResponse.json();
-            const expensesContent = await expensesResponse.json();
+            const expensesContent = await client.getExpenses()
+            const categoriesContent = await client.getCategories()
+            const usersContent = await client.getUsers()
 
             let categoriesMap = new Map<number, CategoryApiResponse>();
             categoriesContent.map((category: CategoryApiResponse) => {
@@ -66,9 +53,6 @@ const ExpensesList = () => {
             usersContent.map((user: UserApiResponse) => {
                 usersMap.set(user.id, user);
             })
-
-            console.log(categoriesMap);
-            console.log(usersMap);
 
             const expenses: ExpenseApiResponse[] = expensesContent.map((item: any) => {
                 return {
