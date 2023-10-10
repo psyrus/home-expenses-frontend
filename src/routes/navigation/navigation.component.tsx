@@ -13,7 +13,7 @@ const Navigation = () => {
   const currentUrl = window.location.href;
   const googleEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
   const options = {
-    redirect_uri: "http://localhost:5000/login/callback" as string,
+    redirect_uri: `${process.env.REACT_APP_API_ENDPOINT}/login/callback` as string,
     client_id: process.env.REACT_APP_OAUTH_CLIENT_ID as string,
     access_type: "offline",
     response_type: "code",
