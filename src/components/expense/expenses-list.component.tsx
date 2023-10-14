@@ -3,6 +3,9 @@ import ExpenseItem from "./expense-item.component";
 import { Container } from "react-bootstrap";
 import ApiClient from "../../utils/backend-api";
 
+// TODO: DELETE JUST FOR TESTING
+import SortableTableTwo from "./sortable-table2.component";
+
 const client = new ApiClient()
 
 export type ExpenseApiResponse = {
