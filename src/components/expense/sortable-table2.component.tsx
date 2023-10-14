@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { MiscItems } from '../../routes/misc/misc.component'
 
 export type SortConfig = {
@@ -16,21 +16,22 @@ const SortableTableTwo = (props: { items: MiscItems[] }) => {
     direction: 'asc'
   })
 
-  let sortedItems = items
-  console.log(sortedItems)
+  useMemo(() => {
+    let sortedItems = items
 
-  sortedItems.sort((a, b) => {
-    // if (a[sortConfig.key] < b[sortConfig.key]) {
-    if (a[sortedField] < b[sortedField]) {
-      return sortConfig.direction === 'asc' ? -1 : 1
-    }
-    if (a[sortedField] > b[sortedField]) {
-      return sortConfig.direction === 'asc' ? 1 : -1
-    }
-    return 0
-  })
+    sortedItems.sort((a, b) => {
+      // if (a[sortConfig.key] < b[sortConfig.key]) {
+      if (a[sortedField] < b[sortedField]) {
+        return sortConfig.direction === 'asc' ? -1 : 1
+      }
+      if (a[sortedField] > b[sortedField]) {
+        return sortConfig.direction === 'asc' ? 1 : -1
+      }
+      return 0
+    })
 
-  console.log(sortedItems)
+    console.log(sortedItems)
+  }, [items, sortConfig])
 
   return (
     <table>
