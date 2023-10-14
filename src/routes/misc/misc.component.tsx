@@ -12,13 +12,13 @@ const Misc = () => {
     {
       id: 1,
       name: 'nam1',
-      price: 100,
+      price: 101,
       stock: 9
     },
     {
       id: 2,
       name: 'nam2',
-      price: 101,
+      price: 100,
       stock: 8
     },
     {
