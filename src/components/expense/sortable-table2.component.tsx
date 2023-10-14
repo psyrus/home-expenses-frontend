@@ -6,41 +6,29 @@ export type SortConfig = {
   direction: string
 }
 
-// const ProductTable = (props: keyof object) => {
-// const SortableTableTwo = (props: any) => {
-// const SortableTableTwo = (props: MiscItems) => {
-// const SortableTableTwo = ({ price }: MiscItems) => {
-// const SortableTableTwo = (props: MiscItems) => {
 const SortableTableTwo = (props: { items: MiscItems[] }) => {
-// const SortableTableTwo = (props: { items: Array<MiscItems> }) => {
-// const SortableTableTwo = ({props}: Array<MiscItems> ) => {
-// const SortableTableTwo = (props: MiscItems[]) => {
   console.log(props)
+  const items = props.items
 
-  // const [sortedField, setSortedField] = useState<keyof MiscItems>([])
   const [sortedField, setSortedField] = useState<keyof MiscItems>('id')
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: 1,
     direction: 'asc'
   })
 
-  // let sortedItems = [...props]
-  let sortedItems = props.items
+  let sortedItems = items
   console.log(sortedItems)
 
-  if (sortedField !== null) {
-    sortedItems.sort((a, b) => {
-      // if (a.name < b.name) {
-      if (a[sortedField] < b[sortedField]) {
-      // if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === 'asc' ? -1 : 1
-      }
-      if (a[sortedField] > b[sortedField]) {
-        return sortConfig.direction === 'asc' ? 1 : -1
-      }
-      return 0
-    })
-  }
+  sortedItems.sort((a, b) => {
+    // if (a[sortConfig.key] < b[sortConfig.key]) {
+    if (a[sortedField] < b[sortedField]) {
+      return sortConfig.direction === 'asc' ? -1 : 1
+    }
+    if (a[sortedField] > b[sortedField]) {
+      return sortConfig.direction === 'asc' ? 1 : -1
+    }
+    return 0
+  })
 
   console.log(sortedItems)
 
@@ -55,8 +43,8 @@ const SortableTableTwo = (props: { items: MiscItems[] }) => {
         </tr>
       </thead>
       <tbody>
-        {props.items.map((item: any) => (
-        // {props.map((item: any) => (
+        {/* {items.map((item: any) => ( */}
+        {items.map((item: MiscItems) => (
           <tr key={item.id}>
             <td onClick={() => setSortedField('name')}>{item.name}</td>
             <td onClick={() => setSortedField('price')}>{item.price}</td>
