@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ExpenseItem from "./expense-item.component";
 import { Container } from "react-bootstrap";
 import ApiClient from "../../utils/backend-api";
-
-const client = new ApiClient()
+import { UserContext, UserContextType } from "../../contexts/user.context";
 
 export type ExpenseApiResponse = {
     "category": number,
@@ -34,6 +33,8 @@ export type UserApiResponse = {
 
 const ExpensesList = () => {
     const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
+    const { currentUser } = useContext(UserContext) as UserContextType;
+    const client = new ApiClient(currentUser?.token)
 
     useEffect(() => {
         /**

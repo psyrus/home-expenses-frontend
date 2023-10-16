@@ -25,7 +25,7 @@ const Navigation = () => {
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email",
     ].join(" "),
-    state: `${window.location.origin}/auth/complete`,
+    state: `${window.location.origin}/auth?route_to=${currentPath}`,
   };
 
   const qs = new URLSearchParams(options);
@@ -41,7 +41,11 @@ const Navigation = () => {
       route: "/expenses",
       description: "View Expenses"
     },
-  ]
+  ];
+
+  const handleLogout = () => {
+    alert("Logout currently not implemented");
+  };
 
   return (
     <Fragment>
@@ -54,7 +58,7 @@ const Navigation = () => {
             {navigationItems.map((navItem: NavigationItem, index: number) => {
               return <li key={index} className="nav-item"><a href={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</a></li>
             })}
-            {currentUser ? <li className="nav-item">{currentUser.email}</li> : <li className="nav-item"><a href={loginUrl} className="nav-link">Login</a></li>}
+            {currentUser ? <Fragment><li className="navbar-text"><span className="">{currentUser.email}</span></li><li className="nav-item"><a href="#" className="nav-link" onClick={handleLogout}>Logout</a></li></Fragment> : <li className="nav-item"><a href={loginUrl} className="nav-link">Login</a></li>}
           </ul>
         </header>
       </div>
