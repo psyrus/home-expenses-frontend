@@ -1,5 +1,5 @@
-import { useContext, useEffect } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Fragment, useContext, useEffect } from "react";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { UserContext, UserContextType } from "../../contexts/user.context";
 import ApiClient from "../../utils/backend-api";
 
@@ -24,8 +24,8 @@ const AuthenticationHandler = () => {
     client.getCurrentUser().then((userJson: any) => {
       updateUser({
         email: userJson.email,
-        id: userJson.sub,
-        name: userJson.name,
+        id: userJson.auth_provider_id,
+        name: userJson.username,
         token: token,
         apiClient: client,
       });
@@ -35,7 +35,10 @@ const AuthenticationHandler = () => {
   console.log("I was in the auth handler!")
   const routePath = searchParams.get("route_to") ?? "/";
   console.log(`Route Path: ${routePath}`)
-  return <Navigate to={routePath} /> // This should navigate to the part sent from searchparams
+  const navigator = useNavigate();
+  navigator(routePath);
+  return <Fragment></Fragment>
+  // return <Navigate to={routePath} /> // This should navigate to the part sent from searchparams
 }
 
 export default AuthenticationHandler;
