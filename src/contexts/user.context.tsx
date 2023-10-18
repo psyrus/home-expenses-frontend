@@ -23,6 +23,7 @@ export const UserContext = createContext<UserContextType>({
 export const UserProvider = ({ children }: any) => {
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
+  // The reinitialization happens here but no idea why...
   console.log(`user initialized to ${currentUser}`)
 
   const updateUser = (user: IUser) => {
