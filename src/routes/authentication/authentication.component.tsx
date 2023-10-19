@@ -20,7 +20,6 @@ const AuthenticationHandler = () => {
     const client = new ApiClient(token)
 
     console.log("Useeffect ran")
-    // I have no idea why the user context doesn't persist: https://github.com/psyrus/react-intro/blob/51065209e1a7454a9a52fbfbb7033b5f72352eff/crwn-clothing/src/contexts/user.context.jsx
     client.getCurrentUser().then((userJson: any) => {
       updateUser({
         email: userJson.email,
@@ -32,13 +31,10 @@ const AuthenticationHandler = () => {
     });
   }, []);
 
-  console.log("I was in the auth handler!")
   const routePath = searchParams.get("route_to") ?? "/";
-  console.log(`Route Path: ${routePath}`)
   const navigator = useNavigate();
   navigator(routePath);
   return <Fragment></Fragment>
-  // return <Navigate to={routePath} /> // This should navigate to the part sent from searchparams
 }
 
 export default AuthenticationHandler;

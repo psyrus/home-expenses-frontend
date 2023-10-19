@@ -32,14 +32,18 @@ export type UserApiResponse = {
 }
 
 const ExpensesList = () => {
-    const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
+    const [expensesData, setExpensesData] = useState<ExpenseApiResponse[] | null>(null);
     const { currentUser } = useContext(UserContext) as UserContextType;
-    const client = new ApiClient(currentUser?.token)
 
     useEffect(() => {
         /**
          * This function doesn't have to be as complicated if the object could simply be built on the backend side.
          */
+        const client = currentUser?.apiClient;
+        if (!client) {
+            return;
+        }
+
         const getExpenses = async () => {
             const expensesContent = await client.getExpenses()
             const categoriesContent = await client.getCategories()
@@ -65,7 +69,7 @@ const ExpensesList = () => {
         }
 
         getExpenses();
-    }, [])
+    }, [currentUser])
 
     return (
         <Container>
