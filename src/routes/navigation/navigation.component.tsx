@@ -1,5 +1,5 @@
 import { Fragment, useContext } from "react";
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { UserContext, IUser, UserContextType } from "../../contexts/user.context";
 
 
@@ -51,14 +51,18 @@ const Navigation = () => {
     <Fragment>
       <div className="container">
         <header className="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-          <a href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <Link to="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
             <span className="fs-4">Home Expenses Tracker</span>
-          </a>
+          </Link>
           <ul className="nav nav-pills">
             {navigationItems.map((navItem: NavigationItem, index: number) => {
-              return <li key={index} className="nav-item"><a href={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</a></li>
+              return (
+                <li key={index} className="nav-item">
+                  <Link to={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</Link>
+                </li>
+              )
             })}
-            {currentUser ? <Fragment><li className="navbar-text"><span className="">{currentUser.email}</span></li><li className="nav-item"><a href="#" className="nav-link" onClick={handleLogout}>Logout</a></li></Fragment> : <li className="nav-item"><a href={loginUrl} className="nav-link">Login</a></li>}
+            {currentUser ? <Fragment><li className="navbar-text"><span className="">{currentUser.email}</span></li><li className="nav-item"><a href="#" className="nav-link" onClick={handleLogout}>Logout</a></li></Fragment> : <li className="nav-item"><Link to={loginUrl} className="nav-link">Login</Link></li>}
           </ul>
         </header>
       </div>
