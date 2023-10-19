@@ -1,5 +1,6 @@
-import { Fragment } from "react";
-import { Outlet } from "react-router-dom";
+import { Fragment, useContext } from "react";
+import { Link, Outlet } from "react-router-dom";
+import { UserContext, IUser, UserContextType } from "../../contexts/user.context";
 
 
 type NavigationItem = {
@@ -8,9 +9,11 @@ type NavigationItem = {
 }
 
 const Navigation = () => {
+
+  const { currentUser } = useContext(UserContext) as UserContextType;
+
   const currentPath: string = window.location.pathname
 
-  const currentUrl = window.location.href;
   const googleEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
   const options = {
     redirect_uri: `${process.env.REACT_APP_API_ENDPOINT}/login/callback` as string,
@@ -22,7 +25,7 @@ const Navigation = () => {
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email",
     ].join(" "),
-    state: currentUrl,
+    state: `${window.location.origin}/auth?route_to=${currentPath}`,
   };
 
   const qs = new URLSearchParams(options);
@@ -38,24 +41,28 @@ const Navigation = () => {
       route: "/expenses",
       description: "View Expenses"
     },
-    {
-      route: loginUrl,
-      description: "Login"
-    }
-  ]
+  ];
+
+  const handleLogout = () => {
+    alert("Logout currently not implemented");
+  };
 
   return (
     <Fragment>
       <div className="container">
         <header className="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-          <a href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <Link to="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
             <span className="fs-4">Home Expenses Tracker</span>
-          </a>
-
+          </Link>
           <ul className="nav nav-pills">
             {navigationItems.map((navItem: NavigationItem, index: number) => {
-              return <li key={index} className="nav-item"><a href={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</a></li>
+              return (
+                <li key={index} className="nav-item">
+                  <Link to={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</Link>
+                </li>
+              )
             })}
+            {currentUser ? <Fragment><li className="navbar-text"><span className="">{currentUser.email}</span></li><li className="nav-item"><a href="#" className="nav-link" onClick={handleLogout}>Logout</a></li></Fragment> : <li className="nav-item"><Link to={loginUrl} className="nav-link">Login</Link></li>}
           </ul>
         </header>
       </div>
