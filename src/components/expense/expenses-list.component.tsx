@@ -76,25 +76,39 @@ const ExpensesList = () => {
             <h1>Expenses</h1>
 
             {expensesData ? (
-                <table className="table table-sm table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Category</th>
-                            <th scope="col">Cost</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Registered by User</th>
-                            <th scope="col">Expense Date</th>
-                            <th scope="col">Paid Back</th>
-                        </tr>
-                    </thead>
-                    <tbody className="table-group-divider">
-                        {
-                            expensesData.map((apiItem) => {
-                                return <ExpenseItem item={apiItem} key={apiItem.id} />
-                            })}
-                    </tbody>
-                </table>
+                <div>
+                    <div>
+                        <h2>Filters</h2>
+                        <form className="form-floating">
+                            <select className="form-select" aria-label="Filter by category">
+                                <option selected>Open this select menu</option>
+                                <option value="1">One</option>
+                                <option value="2">Two</option>
+                                <option value="3">Three</option>
+                            </select>
+                            <button type="submit" className="btn btn-sm btn-primary">Submit</button>
+                        </form>
+                    </div>
+                    <table className="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Cost</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Registered by User</th>
+                                <th scope="col">Expense Date</th>
+                                <th scope="col">Paid Back</th>
+                            </tr>
+                        </thead>
+                        <tbody className="table-group-divider">
+                            {
+                                expensesData.map((apiItem) => {
+                                    return <ExpenseItem item={apiItem} key={apiItem.id} />
+                                })}
+                        </tbody>
+                    </table>
+                </div>
             ) : (
                 <p>Loading...</p>
             )}
