@@ -3,7 +3,7 @@ import Row from 'react-bootstrap/Row';
 import { UserContext, UserContextType } from "../../contexts/user.context";
 
 export type FormFields = {
-  category: string,
+  category: number,
   description: string,
   expense_date: string,
   cost: number,
@@ -15,7 +15,7 @@ export type Category = {
 }
 
 const defaultFormFields: FormFields = {
-  category: '',
+  category: -1,
   description: '',
   expense_date: '',
   cost: 0,
@@ -26,11 +26,10 @@ const ExpenseForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const { currentUser } = useContext(UserContext) as UserContextType;
 
-
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormFields({
-      ...formFields, 'category': value
+      ...formFields, category: parseInt(value)
     })
   };
 
@@ -58,7 +57,9 @@ const ExpenseForm = () => {
     }
 
     const getCategories = async () => {
-      setCategories(await currentUser.apiClient.getCategories());
+      const tmpCategories = await currentUser.apiClient.getCategories()
+      setCategories(tmpCategories);
+      setFormFields({ ...formFields, category: tmpCategories[0].id })
     }
 
     getCategories();
@@ -67,9 +68,13 @@ const ExpenseForm = () => {
   const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!currentUser) {
+      return;
+    }
+
     const myBody = {
       ...formFields,
-      "registered_by_user": 1,
+      "registered_by_user": currentUser?.id,
     }
 
     const requestOptions = {
@@ -81,7 +86,7 @@ const ExpenseForm = () => {
       body: JSON.stringify(myBody)
     };
 
-    fetch('http://localhost:5000/expense', requestOptions)
+    fetch(currentUser?.apiClient.createFullEndpoint("/expense"), requestOptions)
       .then((response) => {
         return response.json();
       })
@@ -89,7 +94,7 @@ const ExpenseForm = () => {
         console.log(content);
       });
 
-    setFormFields({ ...defaultFormFields });
+    setFormFields({ ...defaultFormFields, category: categories[0].id });
   }
 
   return (
@@ -106,9 +111,6 @@ const ExpenseForm = () => {
                     <option key={option.id} value={option.id} >{option.name}</option>
                   ))}
                 </select>
-                {
-                  formFields.category === 'Other' ? <input type="text" placeholder="Add new category" name="new_category" onChange={handleChange}></input> : ""
-                }
               </div>
               <div className="col-sm-6 mb-3">
                 <label htmlFor="form_cost" className="form-label">Cost</label>
