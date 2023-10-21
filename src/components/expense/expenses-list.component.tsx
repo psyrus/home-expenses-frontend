@@ -3,9 +3,6 @@ import ExpenseItem from "./expense-item.component";
 import { Container } from "react-bootstrap";
 import ApiClient from "../../utils/backend-api";
 
-// TODO: DELETE JUST FOR TESTING
-import SortableTableTwo from "./sortable-table2.component";
-
 const client = new ApiClient()
 
 export type ExpenseApiResponse = {
@@ -14,7 +11,7 @@ export type ExpenseApiResponse = {
     "cost": number,
     "created_at": string,
     "description": string,
-    "expense_date": string,
+    "expense_date": Date,
     "id": number,
     "paid_back": boolean,
     "registered_by_user": number,
@@ -73,10 +70,13 @@ const ExpensesList = () => {
             usersContent.map((user: UserApiResponse) => {
                 usersMap.set(user.id, user);
             })
-
+            
             const expenses: ExpenseApiResponse[] = expensesContent.map((item: any) => {
                 return {
-                    ...item, 'user_obj': usersMap.get(item.registered_by_user), 'category_obj': categoriesMap.get(item.category)
+                    ...item,
+                    'user_obj': usersMap.get(item.registered_by_user),
+                    'category_obj': categoriesMap.get(item.category),
+                    'expense_date': new Date(Date.parse(item['expense_date']))
                 }
             });
 
