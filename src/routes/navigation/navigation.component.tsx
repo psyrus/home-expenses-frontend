@@ -1,17 +1,17 @@
 import { Fragment, useContext } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { UserContext, IUser, UserContextType } from "../../contexts/user.context";
+import { UserContext, UserContextType } from "../../contexts/user.context";
 
 
 type NavigationItem = {
   route: string,
-  description: string
+  description: string,
+  requiresLogin?: boolean,
 }
 
 const Navigation = () => {
 
   const { currentUser } = useContext(UserContext) as UserContextType;
-
   const currentPath: string = window.location.pathname
 
   const googleEndpoint = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -35,11 +35,13 @@ const Navigation = () => {
   const navigationItems: NavigationItem[] = [
     {
       route: "/",
-      description: "Create Expense"
+      description: "Create Expense",
+      requiresLogin: true,
     },
     {
       route: "/expenses",
-      description: "View Expenses"
+      description: "View Expenses",
+      requiresLogin: true,
     },
   ];
 
@@ -56,6 +58,9 @@ const Navigation = () => {
           </Link>
           <ul className="nav nav-pills">
             {navigationItems.map((navItem: NavigationItem, index: number) => {
+              if (!currentUser && navItem.requiresLogin) {
+                return;
+              }
               return (
                 <li key={index} className="nav-item">
                   <Link to={navItem.route} className={navItem.route === currentPath ? "nav-link active" : "nav-link"}>{navItem.description}</Link>
