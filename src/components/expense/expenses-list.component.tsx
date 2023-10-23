@@ -3,6 +3,8 @@ import ExpenseItem from "./expense-item.component";
 import { Container } from "react-bootstrap";
 import ApiClient from "../../utils/backend-api";
 import { UserContext, UserContextType } from "../../contexts/user.context";
+import FloatingLabel from 'react-bootstrap/FloatingLabel';
+import Form from 'react-bootstrap/Form';
 
 export type ExpenseApiResponse = {
     "category": number,
@@ -33,6 +35,11 @@ export type UserApiResponse = {
 
 const ExpensesList = () => {
     const [expensesData, setExpensesData] = useState<ExpenseApiResponse[] | null>(null);
+    const [filteredExpensesData, setFilteredExpensesData] = useState<ExpenseApiResponse[] | null>(null);
+    const [maximumCost, setMaxCost] = useState<number>(0);
+    const [categories, setCategories] = useState<CategoryApiResponse[] | null>(null);
+    const [users, setUsers] = useState<UserApiResponse[] | null>(null);
+    const [filters, setFilters] = useState<{ [key: string]: string }>({});
     const { currentUser } = useContext(UserContext) as UserContextType;
 
     useEffect(() => {
@@ -44,10 +51,11 @@ const ExpensesList = () => {
             return;
         }
 
-        const getExpenses = async () => {
+        const getApiContent = async () => {
             const expensesContent = await client.getExpenses()
             const categoriesContent = await client.getCategories()
             const usersContent = await client.getUsers()
+            let tmpMaxCost = 0;
 
             let categoriesMap = new Map<number, CategoryApiResponse>();
             categoriesContent.map((category: CategoryApiResponse) => {
@@ -60,34 +68,88 @@ const ExpensesList = () => {
             })
 
             const expenses: ExpenseApiResponse[] = expensesContent.map((item: any) => {
+                if (item.cost > tmpMaxCost) {
+                    tmpMaxCost = item.cost
+                }
                 return {
                     ...item, 'user_obj': usersMap.get(item.registered_by_user), 'category_obj': categoriesMap.get(item.category)
                 }
             });
 
+            setMaxCost(tmpMaxCost);
+            setCategories(categoriesContent);
+            setUsers(usersContent);
             setExpensesData(expenses);
         }
 
-        getExpenses();
+        getApiContent();
     }, [currentUser])
+
+    useEffect(() => {
+        if (!expensesData) {
+            return;
+        }
+        const tmpExpensesContent = expensesData.filter((item: any) => {
+            if ('category' in filters && filters['category'].length > 0 && item.category != filters['category']) {
+                return false;
+            }
+            if ('user' in filters && filters['user'].length > 0 && item.category != filters['user']) {
+                return false;
+            }
+            if ('minCost' in filters && filters['minCost'].length > 0 && item.cost < parseInt(filters['minCost'])) {
+                return false;
+            }
+            if ('maxCost' in filters && filters['maxCost'].length > 0 && item.cost > parseInt(filters['maxCost'])) {
+                return false;
+            }
+            return true;
+        });
+
+        setFilteredExpensesData(tmpExpensesContent);
+    }, [expensesData, filters])
+
+    const updateFilters = (filterType: string, filterValue: any) => {
+        console.log(`filter type: ${filterType} | filter value: ${filterValue}`)
+        let x: { [key: string]: string } = {}
+        x[filterType] = filterValue;
+        setFilters({ ...filters, ...x })
+        return;
+    }
 
     return (
         <Container>
             <h1>Expenses</h1>
 
-            {expensesData ? (
+            {filteredExpensesData ? (
                 <div>
                     <div>
                         <h2>Filters</h2>
-                        <form className="form-floating">
-                            <select className="form-select" aria-label="Filter by category">
-                                <option selected>Open this select menu</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
-                            </select>
-                            <button type="submit" className="btn btn-sm btn-primary">Submit</button>
-                        </form>
+                        <FloatingLabel controlId="floatingSelect" label="Category">
+                            <Form.Select aria-label="Category label" onChange={(event) => updateFilters('category', event.target.value)}>
+                                <option value=""></option>
+                                {categories?.map((item) => {
+                                    return (
+                                        <option key={item.id} value={item.id}>{item.name}</option>
+                                    )
+                                })}
+                            </Form.Select>
+                        </FloatingLabel>
+                        <FloatingLabel controlId="floatingSelect" label="User">
+                            <Form.Select aria-label="User label" onChange={(event) => updateFilters('user', event.target.value)}>
+                                <option value=""></option>
+                                {users?.map((item) => {
+                                    return (
+                                        <option key={item.id} value={item.id}>{item.username} ({item.email})</option>
+                                    )
+                                })}
+                            </Form.Select>
+                        </FloatingLabel>
+                        <FloatingLabel controlId="floatingInput" label="Minimum Cost">
+                            <Form.Control type="number" min="0" onChange={(event) => updateFilters('minCost', event.target.value)} />
+                        </FloatingLabel>
+                        <FloatingLabel controlId="floatingInput" label="Maximum Cost">
+                            <Form.Control type="number" placeholder={maximumCost.toString()} min="1" max={maximumCost} onChange={(event) => updateFilters('maxCost', event.target.value)} />
+                        </FloatingLabel>
                     </div>
                     <table className="table table-sm table-hover">
                         <thead>
@@ -103,11 +165,13 @@ const ExpensesList = () => {
                         </thead>
                         <tbody className="table-group-divider">
                             {
-                                expensesData.map((apiItem) => {
+                                filteredExpensesData.map((apiItem) => {
                                     return <ExpenseItem item={apiItem} key={apiItem.id} />
-                                })}
+                                })
+                            }
                         </tbody>
                     </table>
+                    {filteredExpensesData.length < 1 ? <div className="text-center">No Expenses</div> : ""}
                 </div>
             ) : (
                 <p>Loading...</p>

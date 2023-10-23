@@ -19,7 +19,6 @@ const AuthenticationHandler = () => {
     const token: string = searchParams.get("token") as string;
     const client = new ApiClient(token)
 
-    console.log("Useeffect ran")
     client.getCurrentUser().then((userJson: any) => {
       updateUser({
         email: userJson.email,

@@ -23,10 +23,7 @@ export const UserContext = createContext<UserContextType>({
 export const UserProvider = ({ children }: any) => {
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
 
-  console.log(`user initialized to ${currentUser}`)
-
   const updateUser = (user: IUser) => {
-    console.log("Setting current user")
     setCurrentUser(user);
   };
 
