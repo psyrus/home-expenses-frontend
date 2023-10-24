@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ExpenseItem from "./expense-item.component";
 import { Container } from "react-bootstrap";
 import ApiClient from "../../utils/backend-api";
-
-const client = new ApiClient()
+import { UserContext, UserContextType } from "../../contexts/user.context";
 
 export type ExpenseApiResponse = {
     "category": number,
@@ -35,6 +34,7 @@ export type UserApiResponse = {
 const ExpensesList = () => {
     const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
     const [sortConfig, setSortConfig] = useState({key: '', direction: 'asc'})
+    const { currentUser } = useContext(UserContext) as UserContextType;
 
     const handleSort = (key: keyof ExpenseApiResponse) => {
         console.log("sorting by", key)
@@ -56,6 +56,11 @@ const ExpensesList = () => {
         /**
          * This function doesn't have to be as complicated if the object could simply be built on the backend side.
          */
+        const client = currentUser?.apiClient;
+        if (!client) {
+            return;
+        }
+
         const getExpenses = async () => {
             const expensesContent = await client.getExpenses()
             const categoriesContent = await client.getCategories()
@@ -84,7 +89,7 @@ const ExpensesList = () => {
         }
 
         getExpenses();
-    }, [])
+    }, [currentUser])
 
     return (
         <Container>

@@ -5,7 +5,7 @@ import Navigation from './routes/navigation/navigation.component';
 import Expenses from './routes/expenses/expenses.component';
 import SortableTableTwo from './components/expense/sortable-table2.component';
 import './App.css';
-import Misc from './routes/misc/misc.component';
+import AuthenticationHandler from './routes/authentication/authentication.component';
 
 const App = () => {
   return (
@@ -13,7 +13,7 @@ const App = () => {
       <Route path='/' element={<Navigation />}>
         <Route index={true} element={<Home />}></Route>
         <Route path="/expenses" Component={Expenses} />
-        <Route path="/misc" Component={Misc} />
+        <Route path="/auth" Component={AuthenticationHandler} />
       </Route>
     </Routes>
   );
