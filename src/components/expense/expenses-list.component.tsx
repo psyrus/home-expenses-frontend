@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { Container, Form } from "react-bootstrap";
 import { UserContext, UserContextType } from "../../contexts/user.context";
 import ExpenseItem from "./expense-item.component";
 
@@ -37,7 +37,10 @@ export type SortConfig = {
 
 const ExpensesList = () => {
   const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' })
+  const [filteredExpensesData, setFilteredExpensesData] = useState<ExpenseApiResponse[]>([]);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: 'asc' });
+  const [filterCategory, setFilterCategory] = useState<string>('');
+  const [filterCost, setFilterCost] = useState<number>(0);
   const { currentUser } = useContext(UserContext) as UserContextType;
 
   const handleSort = (key: keyof ExpenseApiResponse) => {
@@ -45,19 +48,41 @@ const ExpensesList = () => {
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
-    const sortedData = [...expensesData].sort((a, b) => {
+    const sortedData = [...filteredExpensesData].sort((a, b) => {
       if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
       if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
       return 0;
     })
     setSortConfig({ key, direction });
-    setExpensesData(sortedData)
+    setFilteredExpensesData(sortedData);
+  }
+
+  useEffect(() => {
+    const tmpFilteredItems = expensesData.filter((item: ExpenseApiResponse) => {
+      return item.category_obj.name.toLocaleLowerCase().includes(filterCategory) && item.cost > filterCost;
+    });
+
+    setFilteredExpensesData(tmpFilteredItems);
+  }, [expensesData, filterCategory, filterCost])
+
+
+  const handleFilter = (event: ChangeEvent<HTMLInputElement>) => {
+    const categoryString = event.target.value.toLocaleLowerCase();
+
+    setFilterCategory(categoryString);
+  }
+
+  const handleFilterCost = (event: ChangeEvent<HTMLInputElement>) => {
+    const minCost = parseInt(event.target.value.toLocaleLowerCase()) || 0;
+
+    setFilterCost(minCost);
   }
 
   useEffect(() => {
     /**
      * This function doesn't have to be as complicated if the object could simply be built on the backend side.
      */
+
     const client = currentUser?.apiClient;
     if (!client) {
       return;
@@ -88,6 +113,7 @@ const ExpensesList = () => {
       });
 
       setExpensesData(expenses);
+      setFilteredExpensesData(expenses);
     }
 
     getExpenses();
@@ -96,8 +122,15 @@ const ExpensesList = () => {
   return (
     <Container>
       <h1>Expenses</h1>
-
-      {expensesData ? (
+      <Form.Group className="mb-3" controlId="filteringSection.FilterByCategory">
+        <Form.Label>Category</Form.Label>
+        <Form.Control type="input" placeholder="Category name" onChange={handleFilter} />
+      </Form.Group>
+      <Form.Group className="mb-3" controlId="filteringSection.FilterByMinCost">
+        <Form.Label>Minimum Cost</Form.Label>
+        <Form.Control type="number" placeholder="Minimum Cost" onChange={handleFilterCost} />
+      </Form.Group>
+      {filteredExpensesData ? (
         <table className="table table-sm table-hover">
           <thead>
             <tr>
@@ -112,7 +145,7 @@ const ExpensesList = () => {
           </thead>
           <tbody className="table-group-divider">
             {
-              expensesData.map((apiItem) => {
+              filteredExpensesData.map((apiItem) => {
                 return <ExpenseItem item={apiItem} key={apiItem.id} />
               })}
           </tbody>
