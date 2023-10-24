@@ -10,7 +10,7 @@ export type ExpenseApiResponse = {
     "cost": number,
     "created_at": string,
     "description": string,
-    "expense_date": string,
+    "expense_date": Date,
     "id": number,
     "paid_back": boolean,
     "registered_by_user": number,
@@ -32,8 +32,25 @@ export type UserApiResponse = {
 }
 
 const ExpensesList = () => {
-    const [expensesData, setExpensesData] = useState<ExpenseApiResponse[] | null>(null);
+    const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
+    const [sortConfig, setSortConfig] = useState({key: '', direction: 'asc'})
     const { currentUser } = useContext(UserContext) as UserContextType;
+
+    const handleSort = (key: keyof ExpenseApiResponse) => {
+        console.log("sorting by", key)
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        const sortedData = [...expensesData].sort((a, b) => {
+            if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+            if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+            return 0;
+        })
+        console.log(sortedData)
+        setSortConfig({ key, direction });
+        setExpensesData(sortedData)
+    }
 
     useEffect(() => {
         /**
@@ -58,10 +75,13 @@ const ExpensesList = () => {
             usersContent.map((user: UserApiResponse) => {
                 usersMap.set(user.id, user);
             })
-
+            
             const expenses: ExpenseApiResponse[] = expensesContent.map((item: any) => {
                 return {
-                    ...item, 'user_obj': usersMap.get(item.registered_by_user), 'category_obj': categoriesMap.get(item.category)
+                    ...item,
+                    'user_obj': usersMap.get(item.registered_by_user),
+                    'category_obj': categoriesMap.get(item.category),
+                    'expense_date': new Date(Date.parse(item['expense_date']))
                 }
             });
 
@@ -79,13 +99,13 @@ const ExpensesList = () => {
                 <table className="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Category</th>
-                            <th scope="col">Cost</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Registered by User</th>
-                            <th scope="col">Expense Date</th>
-                            <th scope="col">Paid Back</th>
+                            <th scope="col" onClick={() => handleSort('id')}>#</th>
+                            <th scope="col" onClick={() => handleSort('category')}>Category</th>
+                            <th scope="col" onClick={() => handleSort('cost')}>Cost</th>
+                            <th scope="col" onClick={() => handleSort('description')}>Description</th>
+                            <th scope="col" onClick={() => handleSort('registered_by_user')}>Registered by User</th>
+                            <th scope="col" onClick={() => handleSort('expense_date')}>Expense Date</th>
+                            <th scope="col" onClick={() => handleSort('paid_back')}>Paid Back</th>
                         </tr>
                     </thead>
                     <tbody className="table-group-divider">

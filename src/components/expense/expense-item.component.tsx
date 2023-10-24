@@ -12,7 +12,7 @@ const ExpenseItem = ({ item }: ExpenseItemProps) => {
       <td>{item.cost}</td>
       <td>{item.description.slice(0, 15)}</td>
       <td>{item.user_obj.username}</td>
-      <td>{item.expense_date}</td>
+      <td>{item.expense_date.toDateString()}</td>
       <td>{item.paid_back ? "✅" : "✖"}</td>
     </tr>
   );
