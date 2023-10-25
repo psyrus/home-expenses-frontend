@@ -120,6 +120,12 @@ const ExpensesList = () => {
       if ('maxCost' in filters && filters['maxCost'].length > 0 && item.cost > parseInt(filters['maxCost'])) {
         return false;
       }
+      if ('minDate' in filters && filters['minDate'].length > 0 && item.expense_date < new Date(Date.parse(filters['minDate']))) {
+        return false;
+      }
+      if ('maxDate' in filters && filters['maxDate'].length > 0 && item.expense_date > new Date(Date.parse(filters['maxDate']))) {
+        return false;
+      }
       return true;
     });
 
@@ -131,7 +137,6 @@ const ExpensesList = () => {
     let tmp: { [key: string]: string } = {}
     tmp[filterType] = filterValue;
     setFilters({ ...filters, ...tmp })
-    return;
   }
 
   return (
@@ -168,6 +173,12 @@ const ExpensesList = () => {
               </FloatingLabel>
               <FloatingLabel controlId="floatingInput" label="Maximum Cost">
                 <Form.Control type="number" placeholder={maximumCost.toString()} min="1" max={maximumCost} onChange={(event) => updateFilters('maxCost', event.target.value)} />
+              </FloatingLabel>
+              <FloatingLabel controlId="floatingInput" label="Date: From">
+                <Form.Control type="date" min="1" onChange={(event) => updateFilters('minDate', event.target.value)} />
+              </FloatingLabel>
+              <FloatingLabel controlId="floatingInput" label="Date: To">
+                <Form.Control type="date" onChange={(event) => updateFilters('maxDate', event.target.value)} />
               </FloatingLabel>
             </div>
             <table className="table table-sm table-hover">
