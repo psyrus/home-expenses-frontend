@@ -12,7 +12,7 @@ export type ExpenseApiResponse = {
   "cost": number,
   "created_at": string,
   "description": string,
-  "expense_date": string,
+  "expense_date": Date,
   "id": number,
   "paid_back": boolean,
   "registered_by_user": number,
@@ -34,13 +34,28 @@ export type UserApiResponse = {
 }
 
 const ExpensesList = () => {
-  const [expensesData, setExpensesData] = useState<ExpenseApiResponse[] | null>(null);
+  const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
   const [filteredExpensesData, setFilteredExpensesData] = useState<ExpenseApiResponse[] | null>(null);
   const [maximumCost, setMaxCost] = useState<number>(0);
   const [categories, setCategories] = useState<CategoryApiResponse[] | null>(null);
   const [users, setUsers] = useState<UserApiResponse[] | null>(null);
   const [filters, setFilters] = useState<{ [key: string]: string }>({});
+  const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' })
   const { currentUser } = useContext(UserContext) as UserContextType;
+
+  const handleSort = (key: keyof ExpenseApiResponse) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    const sortedData = [...expensesData].sort((a, b) => {
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    })
+    setSortConfig({ key, direction });
+    setExpensesData(sortedData)
+  }
 
   useEffect(() => {
     /**
@@ -72,7 +87,10 @@ const ExpensesList = () => {
           tmpMaxCost = item.cost
         }
         return {
-          ...item, 'user_obj': usersMap.get(item.registered_by_user), 'category_obj': categoriesMap.get(item.category)
+          ...item,
+          'user_obj': usersMap.get(item.registered_by_user),
+          'category_obj': categoriesMap.get(item.category),
+          'expense_date': new Date(Date.parse(item['expense_date']))
         }
       });
 
@@ -110,9 +128,9 @@ const ExpensesList = () => {
 
   const updateFilters = (filterType: string, filterValue: any) => {
     console.log(`filter type: ${filterType} | filter value: ${filterValue}`)
-    let x: { [key: string]: string } = {}
-    x[filterType] = filterValue;
-    setFilters({ ...filters, ...x })
+    let tmp: { [key: string]: string } = {}
+    tmp[filterType] = filterValue;
+    setFilters({ ...filters, ...tmp })
     return;
   }
 
@@ -120,63 +138,65 @@ const ExpensesList = () => {
     <Container>
       <h1>Expenses</h1>
 
-      {filteredExpensesData ? (
-        <div>
+      {
+        filteredExpensesData ? (
           <div>
-            <h2>Filters</h2>
-            <FloatingLabel controlId="floatingSelect" label="Category">
-              <Form.Select aria-label="Category label" onChange={(event) => updateFilters('category', event.target.value)}>
-                <option value=""></option>
-                {categories?.map((item) => {
-                  return (
-                    <option key={item.id} value={item.id}>{item.name}</option>
-                  )
-                })}
-              </Form.Select>
-            </FloatingLabel>
-            <FloatingLabel controlId="floatingSelect" label="User">
-              <Form.Select aria-label="User label" onChange={(event) => updateFilters('user', event.target.value)}>
-                <option value=""></option>
-                {users?.map((item) => {
-                  return (
-                    <option key={item.id} value={item.id}>{item.username} ({item.email})</option>
-                  )
-                })}
-              </Form.Select>
-            </FloatingLabel>
-            <FloatingLabel controlId="floatingInput" label="Minimum Cost">
-              <Form.Control type="number" min="0" onChange={(event) => updateFilters('minCost', event.target.value)} />
-            </FloatingLabel>
-            <FloatingLabel controlId="floatingInput" label="Maximum Cost">
-              <Form.Control type="number" placeholder={maximumCost.toString()} min="1" max={maximumCost} onChange={(event) => updateFilters('maxCost', event.target.value)} />
-            </FloatingLabel>
+            <div>
+              <h2>Filters</h2>
+              <FloatingLabel controlId="floatingSelect" label="Category">
+                <Form.Select aria-label="Category label" onChange={(event) => updateFilters('category', event.target.value)}>
+                  <option value=""></option>
+                  {categories?.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    )
+                  })}
+                </Form.Select>
+              </FloatingLabel>
+              <FloatingLabel controlId="floatingSelect" label="User">
+                <Form.Select aria-label="User label" onChange={(event) => updateFilters('user', event.target.value)}>
+                  <option value=""></option>
+                  {users?.map((item) => {
+                    return (
+                      <option key={item.id} value={item.id}>{item.username} ({item.email})</option>
+                    )
+                  })}
+                </Form.Select>
+              </FloatingLabel>
+              <FloatingLabel controlId="floatingInput" label="Minimum Cost">
+                <Form.Control type="number" min="0" onChange={(event) => updateFilters('minCost', event.target.value)} />
+              </FloatingLabel>
+              <FloatingLabel controlId="floatingInput" label="Maximum Cost">
+                <Form.Control type="number" placeholder={maximumCost.toString()} min="1" max={maximumCost} onChange={(event) => updateFilters('maxCost', event.target.value)} />
+              </FloatingLabel>
+            </div>
+            <table className="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th scope="col" onClick={() => handleSort('id')}>#</th>
+                  <th scope="col" onClick={() => handleSort('category')}>Category</th>
+                  <th scope="col" onClick={() => handleSort('cost')}>Cost</th>
+                  <th scope="col" onClick={() => handleSort('description')}>Description</th>
+                  <th scope="col" onClick={() => handleSort('registered_by_user')}>Registered by User</th>
+                  <th scope="col" onClick={() => handleSort('expense_date')}>Expense Date</th>
+                  <th scope="col" onClick={() => handleSort('paid_back')}>Paid Back</th>
+                </tr>
+              </thead>
+              <tbody className="table-group-divider">
+                {
+                  filteredExpensesData.map((apiItem) => {
+                    return <ExpenseItem item={apiItem} key={apiItem.id} />
+                  })
+                }
+              </tbody>
+            </table>
+            {filteredExpensesData.length < 1 ? <div className="text-center">No Expenses</div> : ""}
           </div>
-          <table className="table table-sm table-hover">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Category</th>
-                <th scope="col">Cost</th>
-                <th scope="col">Description</th>
-                <th scope="col">Registered by User</th>
-                <th scope="col">Expense Date</th>
-                <th scope="col">Paid Back</th>
-              </tr>
-            </thead>
-            <tbody className="table-group-divider">
-              {
-                filteredExpensesData.map((apiItem) => {
-                  return <ExpenseItem item={apiItem} key={apiItem.id} />
-                })
-              }
-            </tbody>
-          </table>
-          {filteredExpensesData.length < 1 ? <div className="text-center">No Expenses</div> : ""}
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </Container>
+        ) : (
+          <p>Loading...</p>
+        )
+      }
+    </Container >
   );
 }
 
