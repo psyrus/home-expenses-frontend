@@ -62,34 +62,34 @@ const ExpensesList = () => {
         }
 
         const getExpenses = async () => {
-            const expensesContent = await client.getExpenses()
-            const categoriesContent = await client.getCategories()
-            const usersContent = await client.getUsers()
+            const expensesContent = await client.getExpenses();
+            const categoriesContent = await client.getCategories();
+            const usersContent = await client.getUsers();
 
             let categoriesMap = new Map<number, CategoryApiResponse>();
             categoriesContent.map((category: CategoryApiResponse) => {
                 categoriesMap.set(category.id, category);
-            })
+            });
 
             let usersMap: Map<number, UserApiResponse> = new Map<number, UserApiResponse>();
             usersContent.map((user: UserApiResponse) => {
                 usersMap.set(user.id, user);
-            })
-            
+            });
+
             const expenses: ExpenseApiResponse[] = expensesContent.map((item: any) => {
                 return {
                     ...item,
                     'user_obj': usersMap.get(item.registered_by_user),
                     'category_obj': categoriesMap.get(item.category),
                     'expense_date': new Date(Date.parse(item['expense_date']))
-                }
+                };
             });
 
             setExpensesData(expenses);
-        }
+        };
 
         getExpenses();
-    }, [currentUser])
+    }, [currentUser]);
 
     return (
         <Container>
@@ -99,20 +99,19 @@ const ExpensesList = () => {
                 <table className="table table-sm table-hover">
                     <thead>
                         <tr>
-                            <th scope="col" onClick={() => handleSort('id')}>#</th>
-                            <th scope="col" onClick={() => handleSort('category')}>Category</th>
-                            <th scope="col" onClick={() => handleSort('cost')}>Cost</th>
-                            <th scope="col" onClick={() => handleSort('description')}>Description</th>
-                            <th scope="col" onClick={() => handleSort('registered_by_user')}>Registered by User</th>
-                            <th scope="col" onClick={() => handleSort('expense_date')}>Expense Date</th>
-                            <th scope="col" onClick={() => handleSort('paid_back')}>Paid Back</th>
+                            <th className={sortConfig.key === "id" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("id")}># </th>
+                            <th className={sortConfig.key === "category" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("category")}> Category</th>
+                            <th className={sortConfig.key === "cost" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("cost")}> Cost</th>
+                            <th className={sortConfig.key === "description" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("description")}> Description</th>
+                            <th className={sortConfig.key === "registered_by_user" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("registered_by_user")}> Registered by User</th>
+                            <th className={sortConfig.key === "expense_date" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("expense_date")}> Expense Date</th>
+                            <th className={sortConfig.key === "paid_back" ? sortConfig.direction : "default"} scope="col" onClick={() => handleSort("paid_back")}> Paid Back</th>
                         </tr>
                     </thead>
                     <tbody className="table-group-divider">
-                        {
-                            expensesData.map((apiItem) => {
-                                return <ExpenseItem item={apiItem} key={apiItem.id} />
-                            })}
+                        {expensesData.map(apiItem => {
+                            return <ExpenseItem item={apiItem} key={apiItem.id} />;
+                        })}
                     </tbody>
                 </table>
             ) : (
@@ -120,6 +119,6 @@ const ExpensesList = () => {
             )}
         </Container>
     );
-}
+};
 
 export default ExpensesList;
