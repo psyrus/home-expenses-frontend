@@ -92,7 +92,7 @@ const ExpensesList = () => {
           'category_obj': categoriesMap.get(item.category),
           'expense_date': new Date(Date.parse(item['expense_date']))
         }
-      }).sort((item: any, nextItem: any) => {
+      }).sort((item: any, nextItem: any) => { // This sort should be done on the DB side
         if (item.id > nextItem.id) {
           return 1
         } else if (item.id < nextItem.id) {
