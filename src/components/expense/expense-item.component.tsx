@@ -1,10 +1,17 @@
+import { Button } from "react-bootstrap";
 import { ExpenseApiResponse } from "./expenses-list.component";
 
 type ExpenseItemProps = {
   item: ExpenseApiResponse
+  callback: Function
 }
 
-const ExpenseItem = ({ item }: ExpenseItemProps) => {
+const ExpenseItem = ({ item, callback }: ExpenseItemProps) => {
+
+  const markExpensePaid = (expenseId: number) => {
+    console.log(`Marking expense ${expenseId} as paid`)
+  }
+
   return (
     <tr key={item.id}>
       <th scope="row">{item.id}</th>
@@ -13,7 +20,12 @@ const ExpenseItem = ({ item }: ExpenseItemProps) => {
       <td>{item.description.slice(0, 15)}</td>
       <td>{item.user_obj.username}</td>
       <td>{item.expense_date.toDateString()}</td>
-      <td>{item.paid_back ? "✅" : "✖"}</td>
+      {item.paid_back ? (
+        <td >✅</td>
+      ) : (
+        <td><Button variant="secondary" size="sm" onClick={() => callback(item.id, true)}>Mark as paid</Button></td>
+      )
+      }
     </tr>
   );
 }

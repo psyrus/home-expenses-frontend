@@ -92,6 +92,14 @@ const ExpensesList = () => {
           'category_obj': categoriesMap.get(item.category),
           'expense_date': new Date(Date.parse(item['expense_date']))
         }
+      }).sort((item: any, nextItem: any) => {
+        if (item.id > nextItem.id) {
+          return 1
+        } else if (item.id < nextItem.id) {
+          return -1
+        } else {
+          return 0
+        }
       });
 
       setMaxCost(tmpMaxCost);
@@ -138,6 +146,24 @@ const ExpensesList = () => {
     tmp[filterType] = filterValue;
     setFilters({ ...filters, ...tmp })
   }
+
+  const updateExpensePaymentState = async (expenseId: number, paidBack: boolean) => {
+    if (!currentUser) {
+      console.error("Currentuser was null");
+      return;
+    }
+    console.log(`Marking expense ${expenseId} as paid`)
+    await currentUser.apiClient.updateExpense(expenseId, { paid_back: paidBack })
+
+    const updatedExpensesData = expensesData.map((item) => {
+      if (item.id === expenseId) {
+        return { ...item, paid_back: paidBack };
+      }
+      return item;
+    })
+
+    setExpensesData(updatedExpensesData);
+  };
 
   return (
     <Container>
@@ -196,7 +222,7 @@ const ExpensesList = () => {
               <tbody className="table-group-divider">
                 {
                   filteredExpensesData.map((apiItem) => {
-                    return <ExpenseItem item={apiItem} key={apiItem.id} />
+                    return <ExpenseItem item={apiItem} key={apiItem.id} callback={updateExpensePaymentState} />
                   })
                 }
               </tbody>
