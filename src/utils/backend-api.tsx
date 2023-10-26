@@ -1,3 +1,8 @@
+type ApiRequest = {
+  headers: any,
+  method: string,
+  body?: string
+}
 
 export class ApiClient {
   apiEndpoint: string | undefined = process.env.REACT_APP_API_ENDPOINT;
@@ -18,12 +23,18 @@ export class ApiClient {
     this.token = token;
   }
 
-  createOptions(method: string): object {
-    return {
+  createOptions(method: string, body: any = null): object {
+    let options: ApiRequest = {
       headers: { ...this.commonHeaders, 'Authorization': `Bearer ${this.token}` },
-      method: method
+      method: method,
     }
-  }
+
+    if (body) {
+      options.body = JSON.stringify(body)
+    }
+
+    return options;
+  };
 
   createFullEndpoint(path: string): string {
     return this.apiEndpoint + path;
@@ -56,6 +67,14 @@ export class ApiClient {
   async getCategories() {
     const expensesEndpoint: string = this.createFullEndpoint("/categories");
     const requestOptions = this.createOptions('GET')
+    const response = await fetch(expensesEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
+
+  async updateExpense(id: number, payload: any) {
+    const expensesEndpoint: string = this.createFullEndpoint(`/expense/${id}`);
+    const requestOptions = this.createOptions('PATCH', payload)
     const response = await fetch(expensesEndpoint, requestOptions);
     const content = await response.json();
     return content;
