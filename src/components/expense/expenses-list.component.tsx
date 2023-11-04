@@ -1,10 +1,9 @@
-import { useContext, useEffect, useState } from "react";
-import ExpenseItem from "./expense-item.component";
-import { Container } from "react-bootstrap";
-import ApiClient from "../../utils/backend-api";
-import { UserContext, UserContextType } from "../../contexts/user.context";
+import { Fragment, useContext, useEffect, useState } from "react";
+import { Button, Collapse, Container, Row, Spinner } from "react-bootstrap";
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
+import { UserContext, UserContextType } from "../../contexts/user.context";
+import ExpenseItem from "./expense-item.component";
 
 export type ExpenseApiResponse = {
   "category": number,
@@ -33,15 +32,24 @@ export type UserApiResponse = {
   username: string
 }
 
+type Summary = {
+  user: UserApiResponse
+  total: number
+}
+
 const ExpensesList = () => {
   const [expensesData, setExpensesData] = useState<ExpenseApiResponse[]>([]);
   const [filteredExpensesData, setFilteredExpensesData] = useState<ExpenseApiResponse[] | null>(null);
-  const [maximumCost, setMaxCost] = useState<number>(0);
-  const [categories, setCategories] = useState<CategoryApiResponse[] | null>(null);
-  const [users, setUsers] = useState<UserApiResponse[] | null>(null);
+  const [maximumCost, setMaxCost] = useState<number>(0); // Might not need to be a state
+  const [categories, setCategories] = useState<CategoryApiResponse[] | null>(null); // Might not need to be a state
+  const [users, setUsers] = useState<UserApiResponse[] | null>(null); // Might not need to be a state
   const [filters, setFilters] = useState<{ [key: string]: string }>({});
   const [sortConfig, setSortConfig] = useState({ key: '', direction: 'asc' })
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const { currentUser } = useContext(UserContext) as UserContextType;
+  const [summary, setSummary] = useState<{ [key: number]: Summary }>({});
 
   const handleSort = (key: keyof ExpenseApiResponse) => {
     let direction = 'asc';
@@ -106,10 +114,34 @@ const ExpensesList = () => {
       setCategories(categoriesContent);
       setUsers(usersContent);
       setExpensesData(expenses);
+      setDataLoaded(true);
     }
 
     getApiContent();
-  }, [currentUser])
+  }, [currentUser]);
+
+  useEffect(() => {
+    const tmpSummary: { [key: number]: Summary } = {};
+    expensesData.forEach(element => {
+
+      if (element.paid_back === true) {
+        return;
+      }
+
+      if (!(element.registered_by_user in tmpSummary)) {
+        tmpSummary[element.registered_by_user] = { user: element.user_obj, total: 0 };
+      }
+      const obj = tmpSummary[element.registered_by_user]
+      if (!obj) {
+        return;
+      }
+      obj.total += element.cost;
+    });
+
+    setSummary(tmpSummary);
+
+  }, [expensesData])
+
 
   useEffect(() => {
     if (!expensesData) {
@@ -162,50 +194,68 @@ const ExpensesList = () => {
       return item;
     })
 
-    setExpensesData(updatedExpensesData);
+    setExpensesData([...updatedExpensesData]);
   };
 
   return (
     <Container>
       <h1>Expenses</h1>
-
       {
-        filteredExpensesData ? (
-          <div>
-            <div>
-              <h2>Filters</h2>
-              <FloatingLabel controlId="floatingSelect" label="Category">
-                <Form.Select aria-label="Category label" onChange={(event) => updateFilters('category', event.target.value)}>
-                  <option value=""></option>
-                  {categories?.map((item) => {
-                    return (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    )
-                  })}
-                </Form.Select>
-              </FloatingLabel>
-              <FloatingLabel controlId="floatingSelect" label="User">
-                <Form.Select aria-label="User label" onChange={(event) => updateFilters('user', event.target.value)}>
-                  <option value=""></option>
-                  {users?.map((item) => {
-                    return (
-                      <option key={item.id} value={item.id}>{item.username} ({item.email})</option>
-                    )
-                  })}
-                </Form.Select>
-              </FloatingLabel>
-              <FloatingLabel controlId="floatingInput" label="Minimum Cost">
-                <Form.Control type="number" min="0" onChange={(event) => updateFilters('minCost', event.target.value)} />
-              </FloatingLabel>
-              <FloatingLabel controlId="floatingInput" label="Maximum Cost">
-                <Form.Control type="number" placeholder={maximumCost.toString()} min="1" max={maximumCost} onChange={(event) => updateFilters('maxCost', event.target.value)} />
-              </FloatingLabel>
-              <FloatingLabel controlId="floatingInput" label="Date: From">
-                <Form.Control type="date" min="1" onChange={(event) => updateFilters('minDate', event.target.value)} />
-              </FloatingLabel>
-              <FloatingLabel controlId="floatingInput" label="Date: To">
-                <Form.Control type="date" onChange={(event) => updateFilters('maxDate', event.target.value)} />
-              </FloatingLabel>
+        dataLoaded && filteredExpensesData ? (
+          <Row>
+            <div className="col-md-6">
+              <Button aria-controls="filter-contents" aria-expanded={filterOpen} onClick={() => setFilterOpen(!filterOpen)}>Filters</Button>
+              <Collapse in={filterOpen} appear={filterOpen}>
+                <div id="filter-contents">
+                  <FloatingLabel controlId="floatingSelect" label="Category">
+                    <Form.Select aria-label="Category label" onChange={(event) => updateFilters('category', event.target.value)}>
+                      <option value=""></option>
+                      {categories?.map((item) => {
+                        return (
+                          <option key={item.id} value={item.id}>{item.name}</option>
+                        )
+                      })}
+                    </Form.Select>
+                  </FloatingLabel>
+                  <FloatingLabel controlId="floatingSelect" label="User">
+                    <Form.Select aria-label="User label" onChange={(event) => updateFilters('user', event.target.value)}>
+                      <option value=""></option>
+                      {users?.map((item) => {
+                        return (
+                          <option key={item.id} value={item.id}>{item.username} ({item.email})</option>
+                        )
+                      })}
+                    </Form.Select>
+                  </FloatingLabel>
+                  <FloatingLabel controlId="floatingInput" label="Minimum Cost">
+                    <Form.Control type="number" min="0" onChange={(event) => updateFilters('minCost', event.target.value)} />
+                  </FloatingLabel>
+                  <FloatingLabel controlId="floatingInput" label="Maximum Cost">
+                    <Form.Control type="number" placeholder={maximumCost.toString()} min="1" max={maximumCost} onChange={(event) => updateFilters('maxCost', event.target.value)} />
+                  </FloatingLabel>
+                  <FloatingLabel controlId="floatingInput" label="Date: From">
+                    <Form.Control type="date" min="1" onChange={(event) => updateFilters('minDate', event.target.value)} />
+                  </FloatingLabel>
+                  <FloatingLabel controlId="floatingInput" label="Date: To">
+                    <Form.Control type="date" onChange={(event) => updateFilters('maxDate', event.target.value)} />
+                  </FloatingLabel>
+                </div>
+              </Collapse>
+            </div>
+            <div className="col-md-6">
+              <Button aria-controls="summary-contents" aria-expanded={summaryOpen} onClick={() => setSummaryOpen(!summaryOpen)}>Summary</Button>
+              <Collapse in={summaryOpen} appear={summaryOpen}>
+                <div id="summary-contents">
+                  {
+                    Object.keys(summary).map((item: string) => {
+                      const parsed = parseInt(item);
+                      return (<div key={item}>{summary[parsed].user.username}: {new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(
+                        summary[parsed].total,
+                      )}</div>);
+                    })
+                  }
+                </div>
+              </Collapse>
             </div>
             <table className="table table-sm table-hover">
               <thead>
@@ -228,9 +278,11 @@ const ExpensesList = () => {
               </tbody>
             </table>
             {filteredExpensesData.length < 1 ? <div className="text-center">No Expenses</div> : ""}
-          </div>
+          </Row>
         ) : (
-          <p>Loading...</p>
+          <div className="text-center">
+            <Spinner animation="border" role="status" />
+          </div>
         )
       }
     </Container >
