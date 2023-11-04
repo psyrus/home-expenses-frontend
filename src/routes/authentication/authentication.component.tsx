@@ -5,9 +5,10 @@ import ApiClient from "../../utils/backend-api";
 
 const AuthenticationHandler = () => {
   const [searchParams] = useSearchParams();
-
+  const routePath = searchParams.get("route_to") ?? "/";
+  const navigator = useNavigate();
   const { updateUser } = useContext(UserContext) as UserContextType;
-
+  const { currentUser } = useContext(UserContext) as UserContextType;
   /**
    * Using the JWT, request the user's information from the API
    * This should provide all of the information that is required for an IUser type
@@ -30,9 +31,14 @@ const AuthenticationHandler = () => {
     });
   }, []);
 
-  const routePath = searchParams.get("route_to") ?? "/";
-  const navigator = useNavigate();
-  navigator(routePath);
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+
+    navigator(routePath);
+  }, [currentUser]);
+
   return <Fragment></Fragment>
 }
 

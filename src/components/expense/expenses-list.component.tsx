@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from "react";
-import { Button, Collapse, Container, Row, Spinner } from "react-bootstrap";
+import { Button, Collapse, Container, Row, Spinner, Table } from "react-bootstrap";
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import { UserContext, UserContextType } from "../../contexts/user.context";
@@ -246,14 +246,29 @@ const ExpensesList = () => {
               <Button aria-controls="summary-contents" aria-expanded={summaryOpen} onClick={() => setSummaryOpen(!summaryOpen)}>Summary</Button>
               <Collapse in={summaryOpen} appear={summaryOpen}>
                 <div id="summary-contents">
-                  {
-                    Object.keys(summary).map((item: string) => {
-                      const parsed = parseInt(item);
-                      return (<div key={item}>{summary[parsed].user.username}: {new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(
-                        summary[parsed].total,
-                      )}</div>);
-                    })
-                  }
+                  <Table hover>
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Total for payback</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {
+                        Object.keys(summary).map((item: string) => {
+                          const parsed = parseInt(item);
+                          const userName = summary[parsed].user.username;
+                          const totalCost = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(summary[parsed].total)
+                          return (
+                            <tr key={item}>
+                              <td>{userName}</td>
+                              <td>{totalCost}</td>
+                            </tr>
+                          );
+                        })
+                      }
+                    </tbody>
+                  </Table>
                 </div>
               </Collapse>
             </div>
