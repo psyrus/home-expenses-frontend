@@ -79,6 +79,14 @@ export class ApiClient {
     const content = await response.json();
     return content;
   }
+
+  async addExpense(payload: any) {
+    const expensesEndpoint: string = this.createFullEndpoint(`/expense`);
+    const requestOptions = this.createOptions('POST', payload)
+    const response = await fetch(expensesEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
 }
 
 export default ApiClient;

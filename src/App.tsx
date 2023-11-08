@@ -1,10 +1,9 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Home from './routes/home/home.component';
-import Navigation from './routes/navigation/navigation.component';
-import Expenses from './routes/expenses/expenses.component';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import AuthenticationHandler from './routes/authentication/authentication.component';
+import Expenses from './routes/expenses/expenses.component';
+import Home from './routes/home/home.component';
+import Navigation from './routes/navigation/navigation.component';
 
 const App = () => {
   return (

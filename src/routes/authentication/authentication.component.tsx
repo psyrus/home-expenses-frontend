@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { UserContext, UserContextType } from "../../contexts/user.context";
 import ApiClient from "../../utils/backend-api";
 
@@ -23,7 +23,8 @@ const AuthenticationHandler = () => {
     client.getCurrentUser().then((userJson: any) => {
       updateUser({
         email: userJson.email,
-        id: userJson.auth_provider_id,
+        id: userJson.id,
+        auth_provider_id: userJson.auth_provider_id,
         name: userJson.username,
         token: token,
         apiClient: client,
