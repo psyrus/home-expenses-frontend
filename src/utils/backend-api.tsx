@@ -72,9 +72,33 @@ export class ApiClient {
     return content;
   }
 
+  async getGroups() {
+    const expensesEndpoint: string = this.createFullEndpoint("/groups");
+    const requestOptions = this.createOptions('GET')
+    const response = await fetch(expensesEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
+
+  async getGroupMembers(groupId: number) {
+    const expensesEndpoint: string = this.createFullEndpoint(`/group/${groupId}/members`);
+    const requestOptions = this.createOptions('GET')
+    const response = await fetch(expensesEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
+
   async updateExpense(id: number, payload: any) {
     const expensesEndpoint: string = this.createFullEndpoint(`/expense/${id}`);
     const requestOptions = this.createOptions('PATCH', payload)
+    const response = await fetch(expensesEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
+
+  async addExpense(payload: any) {
+    const expensesEndpoint: string = this.createFullEndpoint(`/expense`);
+    const requestOptions = this.createOptions('POST', payload)
     const response = await fetch(expensesEndpoint, requestOptions);
     const content = await response.json();
     return content;

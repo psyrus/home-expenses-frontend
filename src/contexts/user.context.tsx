@@ -1,8 +1,9 @@
-import { ReactNode, createContext, useState } from "react";
+import { createContext, useState } from "react";
 import ApiClient from "../utils/backend-api";
 
 export interface IUser {
   id: number;
+  auth_provider_id: string;
   name: string;
   email: string;
   token: string;
