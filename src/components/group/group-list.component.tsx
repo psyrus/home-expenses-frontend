@@ -1,7 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { UserContext, UserContextType } from "../../contexts/user.context";
-import { Container, Row, Spinner } from "react-bootstrap";
+import { Button, Card, Container, ListGroup, Row, Spinner } from "react-bootstrap";
 import { UserApiResponse } from "../expense/expenses-list.component";
+import GroupInfoModal from "./group-info.component";
+import CreateGroupModal from "./group-create.component";
 
 export type GroupMemberApiResponse = {
   id: number
@@ -9,17 +11,21 @@ export type GroupMemberApiResponse = {
   user_id: number
   user?: UserApiResponse
   is_admin: boolean
+  created_at: Date
 }
 export type GroupApiResponse = {
   id: number
   name: string
   description: string
+  created_at: Date
   members?: GroupMemberApiResponse[]
 }
 
 const GroupsList = () => {
   const { currentUser } = useContext(UserContext) as UserContextType;
   const [groupsData, setGroupsData] = useState<GroupApiResponse[]>([]);
+  const [modalShow, setModalShow] = useState<GroupApiResponse>();
+  const [newGroupModalShow, setNewGroupModalShow] = useState<boolean>(false);
 
   useEffect(() => {
 
@@ -52,24 +58,36 @@ const GroupsList = () => {
       return group;
     })
 
-    console.log(`Finished getting members for group ${groupId}. Found ${members.length}`)
-    console.log(members);
-
     setGroupsData([...newGroupsData]);
   }
 
   return (
     <Container>
-      <h1>Groups</h1>
       <Row>
+        <h1>Groups</h1>
+      </Row>
+      <Row>
+        <Button className="col-md-2" size="sm" variant="primary" onClick={() => setNewGroupModalShow(true)}>
+          Add New Group
+        </Button>
+      </Row>
+      <Row className="gy-5 gx-5">
         {
           groupsData ? (
             groupsData.map((groupItem: GroupApiResponse) => {
               return (
-                <div>
-                  <span>{groupItem.name}</span>
-                  <span onClick={() => getGroupMembers(groupItem.id)}>Get Members</span>
-                </div>
+                <Card className="col-md-3 col-sm-6">
+                  <Card.Body>
+                    <Card.Title>{groupItem.name} (ID: {groupItem.id})</Card.Title>
+                    <Card.Subtitle className="mb-2 text-muted">Members: {groupItem.members?.length ?? 0}</Card.Subtitle>
+                    <Card.Text>
+                      <Button variant="primary" onClick={() => setModalShow(groupItem)}>
+                        View Group Info
+                      </Button>
+
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
               )
             })
           ) : (
@@ -78,6 +96,15 @@ const GroupsList = () => {
             </div>
           )
         }
+        <GroupInfoModal
+          show={modalShow !== undefined}
+          onHide={() => setModalShow(undefined)}
+          group={modalShow}
+        />
+        <CreateGroupModal
+          show={newGroupModalShow}
+          onHide={() => setNewGroupModalShow(false)}
+        />
       </Row>
     </Container>
   )
