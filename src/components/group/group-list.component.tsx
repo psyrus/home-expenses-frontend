@@ -74,9 +74,9 @@ const GroupsList = () => {
       <Row className="gy-5 gx-5">
         {
           groupsData ? (
-            groupsData.map((groupItem: GroupApiResponse) => {
+            groupsData.map((groupItem: GroupApiResponse, index) => {
               return (
-                <Card className="col-md-3 col-sm-6">
+                <Card className="col-md-3 col-sm-6" key={index}>
                   <Card.Body>
                     <Card.Title>{groupItem.name} (ID: {groupItem.id})</Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">Members: {groupItem.members?.length ?? 0}</Card.Subtitle>
