@@ -43,22 +43,8 @@ const GroupsList = () => {
 
   }, [currentUser]);
 
-  const getGroupMembers = async (groupId: number) => {
-    const client = currentUser?.apiClient;
-    if (!client) {
-      return;
-    }
-    const members: GroupMemberApiResponse[] = await client.getGroupMembers(groupId)
-
-    const newGroupsData = groupsData.map((group) => {
-      if (group.id == groupId) {
-        group.members = members;
-      }
-
-      return group;
-    })
-
-    setGroupsData([...newGroupsData]);
+  const updateGroupList = (newGroup: GroupApiResponse) => {
+    console.log("Updating the groups list")
   }
 
   return (
@@ -104,6 +90,8 @@ const GroupsList = () => {
         <CreateGroupModal
           show={newGroupModalShow}
           onHide={() => setNewGroupModalShow(false)}
+          apiClient={currentUser?.apiClient}
+          setGroupsCallback={updateGroupList}
         />
       </Row>
     </Container>

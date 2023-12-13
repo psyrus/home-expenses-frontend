@@ -103,6 +103,22 @@ export class ApiClient {
     const content = await response.json();
     return content;
   }
+
+  async addGroup(payload: any) {
+    const groupsEndpoint: string = this.createFullEndpoint(`/group`);
+    const requestOptions = this.createOptions('POST', payload)
+    const response = await fetch(groupsEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
+
+  async addGroupMembers(groupId: number, payload: any) {
+    const groupMemberEndpoint: string = this.createFullEndpoint(`/group/${groupId}/member`);
+    const requestOptions = this.createOptions('POST', payload)
+    const response = await fetch(groupMemberEndpoint, requestOptions);
+    const content = await response.json();
+    return content;
+  }
 }
 
 export default ApiClient;
