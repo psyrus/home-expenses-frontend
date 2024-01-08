@@ -29,7 +29,7 @@ const GroupInfoModal = (props: any) => {
           <ListGroup as="ol" numbered>
             {group.members.map((member) => {
               return (
-                <ListGroup.Item as="li">{member.user?.username}</ListGroup.Item>
+                <ListGroup.Item as="li" key={member.id}>{member.user?.username}</ListGroup.Item>
               )
             })}
           </ListGroup>

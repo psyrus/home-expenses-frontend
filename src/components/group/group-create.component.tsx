@@ -4,6 +4,7 @@ import { Badge, Button, CloseButton, Container, FormCheck, InputGroup, ListGroup
 import Form from 'react-bootstrap/Form';
 import ApiClient from "../../utils/backend-api";
 import { GroupApiResponse } from "./group-list.component";
+import { UserApiResponse } from "../expense/expenses-list.component";
 
 export type NewGroupMember = {
   email: string
@@ -13,6 +14,7 @@ export type NewGroupMember = {
 const CreateGroupModal = (props: any) => {
 
   const apiClient: ApiClient = props.apiClient;
+  const users: UserApiResponse[] = props.userList;
   const [groupMembers, setGroupMembers] = useState<NewGroupMember[]>([])
   const [groupName, setGroupName] = useState<string>("")
   const [groupDescription, setGroupDescription] = useState<string>("")
@@ -23,6 +25,11 @@ const CreateGroupModal = (props: any) => {
     apiClient.addGroup({ name: groupName, description: groupDescription }).then((response: GroupApiResponse) => {
       console.log(response)
       props.setGroupsCallback(response)
+      return response
+    }).then((groupResponse: GroupApiResponse) => {
+      groupMembers.forEach(item => {
+        apiClient.addGroupMember(groupResponse.id, item)
+      })
     })
   }
 
@@ -53,6 +60,11 @@ const CreateGroupModal = (props: any) => {
     setGroupName(newGroupName);
   }
 
+  const handleMemberAdd = (index: number, e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    console.log(e);
+  };
+
   const handleUpdateGroupDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newGroupDescription = event.target.value;
     console.log(newGroupDescription)
@@ -63,6 +75,10 @@ const CreateGroupModal = (props: any) => {
     groupMembers[index].isAdmin = !groupMembers[index].isAdmin;
     setGroupMembers([...groupMembers]);
   }
+
+  // if (!users) {
+  //   return <Fragment></Fragment>
+  // }
 
   return (
     <Modal
@@ -98,7 +114,21 @@ const CreateGroupModal = (props: any) => {
                 return (
                   <InputGroup key={index}>
                     <InputGroup.Text><CloseButton onClick={() => { handleRemoveMember(index) }}></CloseButton></InputGroup.Text>
-                    <Form.Control required type="email" className="col-md-6" onChange={(event: React.ChangeEvent<HTMLInputElement>) => { handleGroupMemberEmailUpdate(event, index) }} value={item.email} placeholder="Email Address" />
+                    {/* <Form.Control required type="email" className="col-md-6" onChange={(event: React.ChangeEvent<HTMLInputElement>) => { handleGroupMemberEmailUpdate(event, index) }} value={item.email} placeholder="Email Address" /> */}
+                    <Form.Select onChange={(e: any) => handleMemberAdd(index, e)}>
+                      <option>User</option>
+                      {
+                        users ? (
+                          users.map((item) => {
+                            return (
+                              <option value={item.id} key={item.id}>{item.username} ({item.email})</option>
+                            )
+                          })
+                        ) : (
+                          <Fragment></Fragment>
+                        )
+                      }
+                    </Form.Select>
                     <InputGroup.Text>Is Admin:</InputGroup.Text>
                     <InputGroup.Checkbox checked={item.isAdmin ?? false} onChange={() => { toggleGroupMemberAdminStateUpdate(index) }} disabled={item.email.length < 1} />
                   </InputGroup>

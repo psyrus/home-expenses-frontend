@@ -26,6 +26,7 @@ const GroupsList = () => {
   const [groupsData, setGroupsData] = useState<GroupApiResponse[]>([]);
   const [modalShow, setModalShow] = useState<GroupApiResponse>();
   const [newGroupModalShow, setNewGroupModalShow] = useState<boolean>(false);
+  const [users, setUsers] = useState<UserApiResponse[] | null>(null); // Might not need to be a state
 
   useEffect(() => {
 
@@ -35,8 +36,14 @@ const GroupsList = () => {
     }
 
     const getApiContent = async () => {
-      const groupsContent = await client.getGroups()
+      let groupsContent: Array<GroupApiResponse> = await client.getGroups()
+      groupsContent.sort((a: GroupApiResponse, b: GroupApiResponse) => {
+        return a.id - b.id
+      })
       setGroupsData(groupsContent);
+
+      const usersContent = await client.getUsers()
+      setUsers(usersContent);
     }
 
     getApiContent();
@@ -45,6 +52,12 @@ const GroupsList = () => {
 
   const updateGroupList = (newGroup: GroupApiResponse) => {
     console.log("Updating the groups list")
+  }
+
+  if (!groupsData || !users) {
+    return <div className="text-center">
+      <Spinner animation="border" role="status" />
+    </div>
   }
 
   return (
@@ -59,7 +72,7 @@ const GroupsList = () => {
       </Row>
       <Row className="gy-5 gx-5">
         {
-          groupsData ? (
+          groupsData && users ? (
             groupsData.map((groupItem: GroupApiResponse, index) => {
               return (
                 <Card className="col-md-3 col-sm-6" key={index}>
@@ -92,6 +105,7 @@ const GroupsList = () => {
           onHide={() => setNewGroupModalShow(false)}
           apiClient={currentUser?.apiClient}
           setGroupsCallback={updateGroupList}
+          usersList={users}
         />
       </Row>
     </Container>

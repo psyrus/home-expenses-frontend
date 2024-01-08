@@ -1,3 +1,5 @@
+import { NewGroupMember } from "../components/group/group-create.component";
+
 type ApiRequest = {
   headers: any,
   method: string,
@@ -112,7 +114,7 @@ export class ApiClient {
     return content;
   }
 
-  async addGroupMembers(groupId: number, payload: any) {
+  async addGroupMember(groupId: number, payload: NewGroupMember) {
     const groupMemberEndpoint: string = this.createFullEndpoint(`/group/${groupId}/member`);
     const requestOptions = this.createOptions('POST', payload)
     const response = await fetch(groupMemberEndpoint, requestOptions);
