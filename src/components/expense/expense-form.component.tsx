@@ -77,14 +77,7 @@ const ExpenseForm = () => {
       "registered_by_user": currentUser?.id,
     }
 
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'mode': 'no-cors'
-      },
-      body: JSON.stringify(myBody)
-    };
+    const requestOptions = currentUser.apiClient.createOptions('POST', myBody);
 
     fetch(currentUser?.apiClient.createFullEndpoint("/expense"), requestOptions)
       .then((response) => {

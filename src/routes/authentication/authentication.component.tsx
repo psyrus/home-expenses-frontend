@@ -23,7 +23,7 @@ const AuthenticationHandler = () => {
     client.getCurrentUser().then((userJson: any) => {
       updateUser({
         email: userJson.email,
-        id: userJson.auth_provider_id,
+        id: userJson.id,
         name: userJson.username,
         token: token,
         apiClient: client,

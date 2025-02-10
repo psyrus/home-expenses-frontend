@@ -9,7 +9,8 @@
             "request": "launch",
             "type": "msedge",
             "url": "http://localhost:3000",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "port": 9876
         },
         {
             "command": "npm start",
