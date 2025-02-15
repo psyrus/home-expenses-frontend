@@ -14,26 +14,26 @@ export type NewGroupMember = {
 const CreateGroupModal = (props: any) => {
 
   const apiClient: ApiClient = props.apiClient;
-  const users: UserApiResponse[] = props.userList;
   const [groupMembers, setGroupMembers] = useState<NewGroupMember[]>([])
   const [groupName, setGroupName] = useState<string>("")
   const [groupDescription, setGroupDescription] = useState<string>("")
+  const [filteredUsers, setFilteredUsers] = useState<UserApiResponse[]>([...props.usersList])
 
   const handleCreateGroup = (event: React.SyntheticEvent) => {
     event.preventDefault();
-    console.log("Creating group")
+    console.log("Creating group");
     apiClient.addGroup({ name: groupName, description: groupDescription }).then((response: GroupApiResponse) => {
-      console.log(response)
-      props.setGroupsCallback(response)
-      return response
+      console.log(response);
+      props.setGroupsCallback(response);
+      return response;
     }).then((groupResponse: GroupApiResponse) => {
       groupMembers.forEach(item => {
-        apiClient.addGroupMember(groupResponse.id, item)
-      })
-    })
+        apiClient.addGroupMember(groupResponse.id, item);
+      });
+    });
   }
 
-  const handleAddMember = () => {
+  const handleAddMemberSelectInput = () => {
     console.log("Adding member to group")
     setGroupMembers([...groupMembers, { email: "" }])
   }
@@ -62,7 +62,14 @@ const CreateGroupModal = (props: any) => {
 
   const handleMemberAdd = (index: number, e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    console.log(e);
+    console.log(index);
+    console.log(value);
+    groupMembers[index] = {
+      email: filteredUsers[parseInt(value) - 1].email,
+      isAdmin: false
+    };
+    setGroupMembers([...groupMembers]);
+    console.log(groupMembers);
   };
 
   const handleUpdateGroupDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,9 +83,9 @@ const CreateGroupModal = (props: any) => {
     setGroupMembers([...groupMembers]);
   }
 
-  // if (!users) {
-  //   return <Fragment></Fragment>
-  // }
+  if (!filteredUsers) {
+    return <Fragment></Fragment>
+  }
 
   return (
     <Modal
@@ -108,9 +115,9 @@ const CreateGroupModal = (props: any) => {
             <Form.Group className="mb-3" controlId="formAddMembers">
               <Form.Label>Group Members</Form.Label>
               <InputGroup>
-                <Button onClick={handleAddMember}>Add Member</Button>
+                <Button onClick={handleAddMemberSelectInput}>Add Member</Button>
               </InputGroup>
-              {groupMembers.map((item, index) => {
+              {groupMembers.map((member, index) => {
                 return (
                   <InputGroup key={index}>
                     <InputGroup.Text><CloseButton onClick={() => { handleRemoveMember(index) }}></CloseButton></InputGroup.Text>
@@ -118,8 +125,8 @@ const CreateGroupModal = (props: any) => {
                     <Form.Select onChange={(e: any) => handleMemberAdd(index, e)}>
                       <option>User</option>
                       {
-                        users ? (
-                          users.map((item) => {
+                        filteredUsers ? (
+                          filteredUsers.map((item) => {
                             return (
                               <option value={item.id} key={item.id}>{item.username} ({item.email})</option>
                             )
@@ -130,7 +137,7 @@ const CreateGroupModal = (props: any) => {
                       }
                     </Form.Select>
                     <InputGroup.Text>Is Admin:</InputGroup.Text>
-                    <InputGroup.Checkbox checked={item.isAdmin ?? false} onChange={() => { toggleGroupMemberAdminStateUpdate(index) }} disabled={item.email.length < 1} />
+                    <InputGroup.Checkbox checked={member.isAdmin ?? false} onChange={() => { toggleGroupMemberAdminStateUpdate(index) }} disabled={member.email.length < 1} />
                   </InputGroup>
                 )
               })}

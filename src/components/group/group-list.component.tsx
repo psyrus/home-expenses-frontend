@@ -28,6 +28,8 @@ const GroupsList = () => {
   const [newGroupModalShow, setNewGroupModalShow] = useState<boolean>(false);
   const [users, setUsers] = useState<UserApiResponse[] | null>(null); // Might not need to be a state
 
+  console.log(users)
+
   useEffect(() => {
 
     const client = currentUser?.apiClient;

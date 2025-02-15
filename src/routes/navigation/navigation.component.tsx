@@ -43,6 +43,11 @@ const Navigation = () => {
       description: "View Expenses",
       requiresLogin: true,
     },
+    {
+      route: "/groups",
+      description: "Groups",
+      requiresLogin: true,
+    },
   ];
 
   const handleLogout = () => {
